@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "50051:50051"
+    depends_on:
+      - db
+    secrets:
+      - db_user
+      - db_pass
+      - db_name
+
+  db:
+    # image: postgres:latest
+    build: ./postgres
+    secrets:
+      - db_pass
+    # environment:
+    #   POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+secrets:
+  db_user:
+    file: ./secrets/db_user.txt
+  db_pass:
+    file: ./secrets/db_pass.txt
+  db_name:
+    file: ./secrets/db_name.txt
+
+volumes:
+  db-data:
