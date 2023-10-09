@@ -38,9 +38,11 @@ struct AppState {
 
 impl AppState {
     async fn create() -> Self {
-        // maybe i dont need config crate for this, change the way to get db info by docker secrets
-        // let cfg_builder = ConfigBuilder::from_env().await.unwrap();
-        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
+        let db_user = docker_secrets::get("db_user").unwrap_or_else(|_| "postgres".to_string());
+        let db_pass = docker_secrets::get("db_pass").unwrap_or_else(|_| "postgres".to_string());
+        let db_name = docker_secrets::get("db_name").unwrap_or_else(|_| "postgres".to_string());
+        let database_url = format!("postgres://{}:{}@db:5432/{}", db_user, db_pass, db_name);
+
         let db_pool = sqlx::PgPool::connect(&database_url)
             .await
             .expect("Failed to create a database connection pool");
